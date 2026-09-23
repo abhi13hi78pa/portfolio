@@ -10,7 +10,6 @@ import { LoginPage } from './pages/admin/LoginPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { DashboardOverview } from './pages/admin/DashboardOverview';
 import { ProfileHeroPage } from './pages/admin/ProfileHeroPage';
-import { AboutManager } from './pages/admin/AboutManager';
 import { SkillsManager } from './pages/admin/SkillsManager';
 import { ProjectsManager } from './pages/admin/ProjectsManager';
 import { ExperienceManager } from './pages/admin/ExperienceManager';
@@ -61,7 +60,7 @@ export const App = () => {
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardOverview />} />
         <Route path="profile" element={<ProfileHeroPage />} />
-        <Route path="about" element={<AboutManager />} />
+        <Route path="about" element={<Navigate to="/admin/profile" replace />} />
         <Route path="skills" element={<SkillsManager />} />
         <Route path="projects" element={<ProjectsManager />} />
         <Route path="experience" element={<ExperienceManager />} />

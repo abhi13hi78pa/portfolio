@@ -13,7 +13,6 @@ import {
 
 import { Navbar } from '../../components/public/Navbar';
 import { HeroSection } from '../../components/public/HeroSection';
-import { AboutSection } from '../../components/public/AboutSection';
 import { SkillsSection } from '../../components/public/SkillsSection';
 import { ProjectsSection } from '../../components/public/ProjectsSection';
 import { ExperienceSection } from '../../components/public/ExperienceSection';
@@ -99,7 +98,6 @@ export const PortfolioPage = () => {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6">
         <HeroSection profile={profile} />
-        <AboutSection profile={profile} />
         <SkillsSection skills={skills} />
         <ProjectsSection projects={projects} />
         <ExperienceSection experience={experience} />

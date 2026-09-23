@@ -3,7 +3,6 @@ import { NavLink, Link, useNavigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
   User,
-  Info,
   Sparkles,
   FolderGit2,
   Briefcase,
@@ -33,7 +32,6 @@ export const AdminLayout = () => {
   const navItems = [
     { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Profile / Hero', to: '/admin/profile', icon: User },
-    { label: 'About', to: '/admin/about', icon: Info },
     { label: 'Skills', to: '/admin/skills', icon: Sparkles },
     { label: 'Projects', to: '/admin/projects', icon: FolderGit2 },
     { label: 'Experience', to: '/admin/experience', icon: Briefcase },
