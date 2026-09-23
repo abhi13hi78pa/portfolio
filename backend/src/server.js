@@ -74,23 +74,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/skills', skillRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/experience', experienceRoutes);
-app.use('/api/education', educationRoutes);
-app.use('/api/certifications', certificationRoutes);
-app.use('/api/coding-profiles', codingProfileRoutes);
-app.use('/api/social-links', socialLinkRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/settings', settingsRoutes);
+// API Routes - mounted on both /api/* and /* for full compatibility
+const apiEndpoints = [
+  ['/auth', authRoutes],
+  ['/profile', profileRoutes],
+  ['/skills', skillRoutes],
+  ['/projects', projectRoutes],
+  ['/experience', experienceRoutes],
+  ['/education', educationRoutes],
+  ['/certifications', certificationRoutes],
+  ['/coding-profiles', codingProfileRoutes],
+  ['/social-links', socialLinkRoutes],
+  ['/upload', uploadRoutes],
+  ['/stats', statsRoutes],
+  ['/settings', settingsRoutes],
+];
+
+apiEndpoints.forEach(([pathPrefix, router]) => {
+  app.use(`/api${pathPrefix}`, router);
+  app.use(pathPrefix, router);
+});
 
 // Error handling middleware
 app.use(notFound);
