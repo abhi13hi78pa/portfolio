@@ -55,6 +55,7 @@ app.use(cors({
     const normalized = origin.replace(/\/$/, '');
     if (
       allowedOrigins.includes(normalized) ||
+      allowedOrigins.includes('*') ||
       normalized.endsWith('.vercel.app') ||
       process.env.NODE_ENV !== 'production'
     ) {
