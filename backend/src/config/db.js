@@ -66,6 +66,8 @@ export const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   },
 });
 
+export let isDbConnected = false;
+
 export const connectDB = async () => {
   try {
     // 1. Attempt to ensure database exists (works on local MySQL and cloud instances where user has create permissions)
@@ -94,7 +96,9 @@ export const connectDB = async () => {
 
     await sequelize.sync({ alter: true });
     console.log(' Database tables synchronized.');
+    isDbConnected = true;
   } catch (error) {
+    isDbConnected = false;
     console.error(' MySQL Database connection failed:', error.message);
     throw error;
   }

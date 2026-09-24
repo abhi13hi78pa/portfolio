@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { connectDB } from './config/db.js';
+import { connectDB, isDbConnected } from './config/db.js';
 import { syncAdminCredentials } from './controllers/authController.js';
 import './models/index.js'; // Ensure models are registered with Sequelize
 
@@ -75,7 +75,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get(['/api/health', '/health'], (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: isDbConnected ? 'ok' : 'degraded',
+    database: isDbConnected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // API Routes - mounted on both /api/* and /* for full compatibility
@@ -105,17 +109,31 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    await syncAdminCredentials();
-    app.listen(PORT, () => {
-      console.log(` Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error.message);
-    process.exit(1);
-  }
+const startServer = () => {
+  // 1. Bind to port immediately so Render marks service as healthy/live
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+
+  // 2. Connect to database in the background with automatic retries
+  const connectWithRetry = async (attempt = 1, maxAttempts = 15, delayMs = 6000) => {
+    try {
+      console.log(`📡 Connecting to MySQL database (attempt ${attempt}/${maxAttempts})...`);
+      await connectDB();
+      await syncAdminCredentials();
+      console.log('✅ MySQL connected and admin account verified successfully.');
+    } catch (error) {
+      console.error(`❌ Database connection attempt ${attempt}/${maxAttempts} failed:`, error.message);
+      if (attempt < maxAttempts) {
+        console.log(`⏳ Retrying database connection in ${delayMs / 1000}s...`);
+        setTimeout(() => connectWithRetry(attempt + 1, maxAttempts, delayMs), delayMs);
+      } else {
+        console.error('⚠️ Could not connect to MySQL database after maximum retries. Please verify your DATABASE_URL in Render environment variables.');
+      }
+    }
+  };
+
+  connectWithRetry();
 };
 
 startServer();
