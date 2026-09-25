@@ -15,7 +15,6 @@ import { Navbar } from '../../components/public/Navbar';
 import { HeroSection } from '../../components/public/HeroSection';
 import { SkillsSection } from '../../components/public/SkillsSection';
 import { ProjectsSection } from '../../components/public/ProjectsSection';
-import { ExperienceSection } from '../../components/public/ExperienceSection';
 import { EducationSection } from '../../components/public/EducationSection';
 import { CertificationsSection } from '../../components/public/CertificationsSection';
 import { CodingProfilesSection } from '../../components/public/CodingProfilesSection';
@@ -100,7 +99,6 @@ export const PortfolioPage = () => {
         <HeroSection profile={profile} />
         <SkillsSection skills={skills} />
         <ProjectsSection projects={projects} />
-        <ExperienceSection experience={experience} />
         <EducationSection education={education} />
         <CertificationsSection certifications={certifications} />
         <CodingProfilesSection profiles={codingProfiles} />

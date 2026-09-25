@@ -8,7 +8,6 @@ export const Navbar = ({ profile }) => {
   const navLinks = [
     { label: 'Skills', href: '#skills' },
     { label: 'Projects', href: '#projects' },
-    { label: 'Experience', href: '#experience' },
     { label: 'Education', href: '#education' },
     { label: 'Profiles', href: '#profiles' },
     { label: 'Connect', href: '#connect' },
