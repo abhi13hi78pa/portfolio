@@ -47,6 +47,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust exactly one reverse-proxy hop (Render's load-balancer).
+// Must be set BEFORE rate-limiting middleware so express-rate-limit
+// can read the real client IP from X-Forwarded-For without throwing.
+app.set('trust proxy', 1);
+
 // CORS configuration - defined before helmet to satisfy connectSrc CSP
 const rawFrontendUrls = (process.env.FRONTEND_URL || '')
   .split(',')
