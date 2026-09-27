@@ -3,6 +3,8 @@ import axiosClient from './axiosClient';
 export const authApi = {
   login: (data) => axiosClient.post('/auth/login', data).then(r => r.data),
   verify2FA: (data) => axiosClient.post('/auth/verify-2fa', data).then(r => r.data),
+  refresh: () => axiosClient.post('/auth/refresh').then(r => r.data),
+  logout: () => axiosClient.post('/auth/logout').then(r => r.data),
   generate2FA: () => axiosClient.post('/auth/2fa/generate').then(r => r.data),
   enable2FA: (data) => axiosClient.post('/auth/2fa/enable', data).then(r => r.data),
   disable2FA: (data) => axiosClient.post('/auth/2fa/disable', data).then(r => r.data),

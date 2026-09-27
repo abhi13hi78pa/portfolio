@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { sanitizeRichText, sanitizePlainText } from '../utils/sanitize.js';
 
 export const Education = sequelize.define('Education', {
   id: {
@@ -39,4 +40,24 @@ export const Education = sequelize.define('Education', {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
+}, {
+  hooks: {
+    beforeCreate: (edu) => {
+      if (edu.institution) edu.institution = sanitizePlainText(edu.institution);
+      if (edu.degree) edu.degree = sanitizePlainText(edu.degree);
+      if (edu.fieldOfStudy) edu.fieldOfStudy = sanitizePlainText(edu.fieldOfStudy);
+      if (edu.grade) edu.grade = sanitizePlainText(edu.grade);
+      if (edu.description) edu.description = sanitizeRichText(edu.description);
+    },
+    beforeUpdate: (edu) => {
+      if (edu.institution) edu.institution = sanitizePlainText(edu.institution);
+      if (edu.degree) edu.degree = sanitizePlainText(edu.degree);
+      if (edu.fieldOfStudy) edu.fieldOfStudy = sanitizePlainText(edu.fieldOfStudy);
+      if (edu.grade) edu.grade = sanitizePlainText(edu.grade);
+      if (edu.description) edu.description = sanitizeRichText(edu.description);
+    },
+  },
+  indexes: [
+    { fields: ['displayOrder'] },
+  ],
 });

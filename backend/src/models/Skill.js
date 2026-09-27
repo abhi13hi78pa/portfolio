@@ -31,4 +31,9 @@ export const Skill = sequelize.define('Skill', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+}, {
+  indexes: [
+    { fields: ['displayOrder'] },
+    { fields: ['isActive'] },
+  ],
 });

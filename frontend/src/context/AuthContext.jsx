@@ -14,18 +14,35 @@ export const AuthProvider = ({ children }) => {
         try {
           const me = await authApi.getMe();
           setAdmin(me);
+          setIsLoading(false);
+          return;
         } catch (error) {
-          console.warn('Session expired or invalid token');
-          localStorage.removeItem('adminToken');
-          setToken(null);
-          setAdmin(null);
+          // Access token might be expired, attempt cookie-based refresh below
         }
       }
-      setIsLoading(false);
+
+      // Try silent refresh using HttpOnly cookie
+      try {
+        const refreshData = await authApi.refresh();
+        if (refreshData?.token) {
+          localStorage.setItem('adminToken', refreshData.token);
+          setToken(refreshData.token);
+          const me = await authApi.getMe();
+          setAdmin(me);
+        } else {
+          setAdmin(null);
+        }
+      } catch (err) {
+        localStorage.removeItem('adminToken');
+        setToken(null);
+        setAdmin(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     checkAuth();
-  }, [token]);
+  }, []);
 
   const login = async (email, password) => {
     const data = await authApi.login({ email, password });
@@ -55,10 +72,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminToken');
-    setToken(null);
-    setAdmin(null);
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch (err) {
+      console.warn('Logout network error:', err);
+    } finally {
+      localStorage.removeItem('adminToken');
+      setToken(null);
+      setAdmin(null);
+    }
   };
 
   return (

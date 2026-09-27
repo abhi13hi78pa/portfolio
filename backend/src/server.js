@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,20 +24,30 @@ import statsRoutes from './routes/statsRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { globalLimiter, apiMutationLimiter } from './middleware/rateLimiter.js';
 
 dotenv.config();
+
+// Validate critical environment variables
+const requiredEnv = ['JWT_SECRET', 'ADMIN_EMAIL', 'ADMIN_PASSWORD'];
+for (const key of requiredEnv) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
+// Warn if FRONTEND_URL not set in production
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  console.warn('⚠️ FRONTEND_URL not set; CORS will only allow localhost origins.');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' },
-}));
-
-// CORS configuration
+// CORS configuration - defined before helmet to satisfy connectSrc CSP
 const rawFrontendUrls = (process.env.FRONTEND_URL || '')
   .split(',')
   .map((u) => u.trim().replace(/\/$/, ''))
@@ -49,16 +60,29 @@ const allowedOrigins = [
   ...rawFrontendUrls,
 ];
 
+// Security middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'", ...rawFrontendUrls],
+      frameAncestors: ["'none'"],
+    },
+  },
+}));
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     const normalized = origin.replace(/\/$/, '');
-    if (
-      allowedOrigins.includes(normalized) ||
-      allowedOrigins.includes('*') ||
-      normalized.endsWith('.vercel.app') ||
-      process.env.NODE_ENV !== 'production'
-    ) {
+    const isAllowed = allowedOrigins.includes(normalized) ||
+      (process.env.NODE_ENV !== 'production' && allowedOrigins.length === 0);
+    if (isAllowed) {
       callback(null, true);
     } else {
       callback(new Error(`Not allowed by CORS: ${origin}`));
@@ -67,22 +91,33 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Rate limiting
+app.use(globalLimiter);
+app.use('/api', apiMutationLimiter);
+
+// Cookie parser for HttpOnly refresh tokens
+app.use(cookieParser());
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Static uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get(['/api/health', '/health'], (req, res) => {
-  res.json({
+  const isProd = process.env.NODE_ENV === 'production';
+  const response = {
     status: isDbConnected ? 'ok' : 'degraded',
-    database: isDbConnected ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
-  });
+  };
+  if (!isProd) {
+    response.database = isDbConnected ? 'connected' : 'disconnected';
+  }
+  res.json(response);
 });
 
-// API Routes - mounted on both /api/* and /* for full compatibility
+// API Routes - mounted under /api/*
 const apiEndpoints = [
   ['/auth', authRoutes],
   ['/profile', profileRoutes],
@@ -100,7 +135,6 @@ const apiEndpoints = [
 
 apiEndpoints.forEach(([pathPrefix, router]) => {
   app.use(`/api${pathPrefix}`, router);
-  app.use(pathPrefix, router);
 });
 
 // Error handling middleware
@@ -136,4 +170,9 @@ const startServer = () => {
   connectWithRetry();
 };
 
-startServer();
+export { app, startServer };
+
+const isMainModule = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+if (isMainModule && process.env.NODE_ENV !== 'test' && !process.argv.includes('--test')) {
+  startServer();
+}

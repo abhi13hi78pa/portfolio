@@ -1,8 +1,6 @@
 import mysql from 'mysql2/promise';
 import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { runMigrations } from './migrator.js';
 
 // Parse credentials from individual vars or DATABASE_URL
 let dbUser = process.env.DB_USER || 'root';
@@ -90,12 +88,23 @@ export const connectDB = async () => {
       console.log(` Notice: Database creation check skipped or pre-existing (${createErr.message})`);
     }
 
-    // 2. Authenticate Sequelize and sync tables
+    // 2. Authenticate Sequelize and run migrations
     await sequelize.authenticate();
     console.log(` Sequelize connected successfully to MySQL at ${dbHost}:${dbPort}`);
 
-    await sequelize.sync({ alter: true });
-    console.log(' Database tables synchronized.');
+    // Production database schema changes MUST use migrations. Never use sync({ alter: true }) in production.
+    const isProd = process.env.NODE_ENV === 'production';
+    if (isProd) {
+      await runMigrations();
+    } else {
+      try {
+        await runMigrations();
+      } catch (migErr) {
+        console.warn(' Notice: Migration in dev fallback to sync:', migErr.message);
+        await sequelize.sync();
+      }
+    }
+    console.log(' Database schema synchronized via migrations.');
     isDbConnected = true;
   } catch (error) {
     isDbConnected = false;

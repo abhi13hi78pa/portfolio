@@ -26,16 +26,28 @@ const diskStorage = multer.diskStorage({
   },
 });
 
+const allowedMimeTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/svg+xml',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
 export const upload = multer({
   storage: isCloudinaryConfigured ? memoryStorage : diskStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const allowedExtensions = /jpeg|jpg|png|webp|svg|pdf|doc|docx/;
     const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
-    if (allowedExtensions.test(ext)) {
+    const extOk = allowedExtensions.test(ext);
+    const mimeOk = allowedMimeTypes.includes(file.mimetype);
+    if (extOk && mimeOk) {
       cb(null, true);
     } else {
-      cb(new Error('Unsupported file format. Allowed: images, PDF, DOC.'));
+      cb(new Error('Unsupported file format. Allowed: images (JPEG, PNG, WebP, SVG), PDF, DOC/DOCX.'));
     }
   },
 });

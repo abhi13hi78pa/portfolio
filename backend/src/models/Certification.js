@@ -39,4 +39,9 @@ export const Certification = sequelize.define('Certification', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+}, {
+  indexes: [
+    { fields: ['displayOrder'] },
+    { fields: ['isActive'] },
+  ],
 });

@@ -31,4 +31,9 @@ export const CodingProfile = sequelize.define('CodingProfile', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+}, {
+  indexes: [
+    { fields: ['displayOrder'] },
+    { fields: ['isActive'] },
+  ],
 });

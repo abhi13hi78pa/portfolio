@@ -5,13 +5,13 @@ import {
   updateCertification,
   deleteCertification,
 } from '../controllers/certificationController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getCertifications);
-router.post('/', protect, createCertification);
-router.put('/:id', protect, updateCertification);
-router.delete('/:id', protect, deleteCertification);
+router.post('/', protect, requireRole('admin'), createCertification);
+router.put('/:id', protect, requireRole('admin'), updateCertification);
+router.delete('/:id', protect, requireRole('admin'), deleteCertification);
 
 export default router;

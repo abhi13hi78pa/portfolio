@@ -6,14 +6,14 @@ import {
   deleteSkill,
   reorderSkills,
 } from '../controllers/skillController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getSkills);
-router.post('/', protect, createSkill);
-router.put('/reorder', protect, reorderSkills);
-router.put('/:id', protect, updateSkill);
-router.delete('/:id', protect, deleteSkill);
+router.post('/', protect, requireRole('admin'), createSkill);
+router.put('/reorder', protect, requireRole('admin'), reorderSkills);
+router.put('/:id', protect, requireRole('admin'), updateSkill);
+router.delete('/:id', protect, requireRole('admin'), deleteSkill);
 
 export default router;

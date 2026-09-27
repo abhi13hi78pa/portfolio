@@ -5,13 +5,13 @@ import {
   updateSocialLink,
   deleteSocialLink,
 } from '../controllers/socialLinkController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getSocialLinks);
-router.post('/', protect, createSocialLink);
-router.put('/:id', protect, updateSocialLink);
-router.delete('/:id', protect, deleteSocialLink);
+router.post('/', protect, requireRole('admin'), createSocialLink);
+router.put('/:id', protect, requireRole('admin'), updateSocialLink);
+router.delete('/:id', protect, requireRole('admin'), deleteSocialLink);
 
 export default router;

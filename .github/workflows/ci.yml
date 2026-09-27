@@ -1,0 +1,65 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-and-test:
+    name: Build, Lint & Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd backend && npm install
+          cd ../frontend && npm install
+
+      - name: Backend syntax & lint validation
+        run: |
+          node --check backend/src/server.js
+          node --check backend/src/controllers/authController.js
+          node --check backend/src/config/migrator.js
+
+      - name: Run Backend Unit & Integration Tests
+        env:
+          JWT_SECRET: ci_test_jwt_secret_key_minimum_32_chars!
+          JWT_REFRESH_SECRET: ci_test_refresh_secret_key_minimum_32_chars!
+          ADMIN_EMAIL: admin@portfolio.local
+          ADMIN_PASSWORD: admin_ci_test_password
+          NODE_ENV: test
+        run: |
+          cd backend
+          npm test
+
+      - name: Run Frontend Tests
+        run: |
+          cd frontend
+          npm test
+
+      - name: Build Frontend Application
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Validate Backend Module Initialization
+        env:
+          JWT_SECRET: ci_test_jwt_secret_key_minimum_32_chars!
+          JWT_REFRESH_SECRET: ci_test_refresh_secret_key_minimum_32_chars!
+          ADMIN_EMAIL: admin@portfolio.local
+          ADMIN_PASSWORD: admin_ci_test_password
+          NODE_ENV: test
+        run: |
+          node -e "import('./backend/src/server.js').then(() => { console.log('✅ Backend modules initialized successfully.'); process.exit(0); }).catch(e => { console.error(e); process.exit(1); })"

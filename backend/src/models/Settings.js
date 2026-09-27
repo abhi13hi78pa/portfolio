@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { sanitizeRichText, sanitizePlainText } from '../utils/sanitize.js';
 
 export const Settings = sequelize.define('Settings', {
   id: {
@@ -26,5 +27,20 @@ export const Settings = sequelize.define('Settings', {
   faviconUrl: {
     type: DataTypes.STRING,
     defaultValue: '',
+  },
+}, {
+  hooks: {
+    beforeCreate: (settings) => {
+      if (settings.pageTitle) settings.pageTitle = sanitizePlainText(settings.pageTitle);
+      if (settings.ogTitle) settings.ogTitle = sanitizePlainText(settings.ogTitle);
+      if (settings.metaDescription) settings.metaDescription = sanitizeRichText(settings.metaDescription);
+      if (settings.ogDescription) settings.ogDescription = sanitizeRichText(settings.ogDescription);
+    },
+    beforeUpdate: (settings) => {
+      if (settings.pageTitle) settings.pageTitle = sanitizePlainText(settings.pageTitle);
+      if (settings.ogTitle) settings.ogTitle = sanitizePlainText(settings.ogTitle);
+      if (settings.metaDescription) settings.metaDescription = sanitizeRichText(settings.metaDescription);
+      if (settings.ogDescription) settings.ogDescription = sanitizeRichText(settings.ogDescription);
+    },
   },
 });

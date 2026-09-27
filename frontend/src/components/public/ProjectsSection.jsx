@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, Github, Eye } from 'lucide-react';
 import { ProjectModal } from './ProjectModal';
 import { EmptyState } from './EmptyState';
+import { parseTechStack } from '../../utils/techStack';
 
 export const ProjectsSection = ({ projects = [] }) => {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -23,11 +24,7 @@ export const ProjectsSection = ({ projects = [] }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {projects.map((project) => {
-            const techStack = Array.isArray(project.techStack)
-              ? project.techStack
-              : typeof project.techStack === 'string'
-              ? JSON.parse(project.techStack || '[]')
-              : [];
+            const techStack = parseTechStack(project.techStack);
 
             return (
               <div

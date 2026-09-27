@@ -1,6 +1,14 @@
 import jwt from 'jsonwebtoken';
 import { Admin } from '../models/Admin.js';
 
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set');
+  }
+  return secret;
+};
+
 export const protect = async (req, res, next) => {
   let token;
   if (
@@ -9,7 +17,7 @@ export const protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_jwt_secret');
+      const decoded = jwt.verify(token, getJwtSecret());
       const admin = await Admin.findByPk(decoded.id, {
         attributes: { exclude: ['password'] },
       });
@@ -27,4 +35,13 @@ export const protect = async (req, res, next) => {
   } else {
     return res.status(401).json({ message: 'Not authorized, no token provided' });
   }
+};
+
+export const requireRole = (...roles) => {
+  return (req, res, next) => {
+    if (!req.admin || !roles.includes(req.admin.role)) {
+      return res.status(403).json({ message: 'Forbidden: insufficient role' });
+    }
+    next();
+  };
 };

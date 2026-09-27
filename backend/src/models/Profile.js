@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { sanitizeRichText, sanitizePlainText } from '../utils/sanitize.js';
 
 export const Profile = sequelize.define('Profile', {
   id: {
@@ -46,5 +47,24 @@ export const Profile = sequelize.define('Profile', {
   secondaryBtnText: {
     type: DataTypes.STRING,
     defaultValue: 'View Projects',
+  },
+}, {
+  hooks: {
+    beforeCreate: (profile) => {
+      if (profile.name) profile.name = sanitizePlainText(profile.name);
+      if (profile.role) profile.role = sanitizePlainText(profile.role);
+      if (profile.tagline) profile.tagline = sanitizeRichText(profile.tagline);
+      if (profile.heroDescription) profile.heroDescription = sanitizeRichText(profile.heroDescription);
+      if (profile.aboutHeading) profile.aboutHeading = sanitizePlainText(profile.aboutHeading);
+      if (profile.aboutDescription) profile.aboutDescription = sanitizeRichText(profile.aboutDescription);
+    },
+    beforeUpdate: (profile) => {
+      if (profile.name) profile.name = sanitizePlainText(profile.name);
+      if (profile.role) profile.role = sanitizePlainText(profile.role);
+      if (profile.tagline) profile.tagline = sanitizeRichText(profile.tagline);
+      if (profile.heroDescription) profile.heroDescription = sanitizeRichText(profile.heroDescription);
+      if (profile.aboutHeading) profile.aboutHeading = sanitizePlainText(profile.aboutHeading);
+      if (profile.aboutDescription) profile.aboutDescription = sanitizeRichText(profile.aboutDescription);
+    },
   },
 });

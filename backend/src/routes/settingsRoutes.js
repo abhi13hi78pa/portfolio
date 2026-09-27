@@ -1,10 +1,10 @@
 import express from 'express';
 import { getSettings, updateSettings } from '../controllers/settingsController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getSettings);
-router.put('/', protect, updateSettings);
+router.put('/', protect, requireRole('admin'), updateSettings);
 
 export default router;

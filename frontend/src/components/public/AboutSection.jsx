@@ -1,5 +1,6 @@
 import React from 'react';
 import { EmptyState } from './EmptyState';
+import { SafeHtml } from '../common/SafeHtml';
 
 export const AboutSection = ({ profile }) => {
   const heading = profile?.aboutHeading || 'About';
@@ -11,9 +12,7 @@ export const AboutSection = ({ profile }) => {
         {heading}
       </h2>
       {description ? (
-        <p className="text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
-          {description}
-        </p>
+        <SafeHtml html={description} className="text-slate-300 text-sm sm:text-base leading-relaxed" />
       ) : (
         <EmptyState
           type="experience"

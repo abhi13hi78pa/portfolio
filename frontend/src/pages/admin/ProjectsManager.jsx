@@ -16,6 +16,7 @@ import {
 import { projectsApi } from '../../api/endpoints';
 import { FileUploader } from '../../components/admin/FileUploader';
 import { ConfirmModal } from '../../components/admin/ConfirmModal';
+import { parseTechStack } from '../../utils/techStack';
 
 export const ProjectsManager = () => {
   const [projects, setProjects] = useState([]);
@@ -184,11 +185,7 @@ export const ProjectsManager = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {projects.map((project) => {
-            const techs = Array.isArray(project.techStack)
-              ? project.techStack
-              : typeof project.techStack === 'string'
-              ? JSON.parse(project.techStack || '[]')
-              : [];
+            const techs = parseTechStack(project.techStack);
 
             return (
               <div

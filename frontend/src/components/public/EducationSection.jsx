@@ -1,6 +1,7 @@
 import React from 'react';
 import { GraduationCap, Calendar } from 'lucide-react';
 import { EmptyState } from './EmptyState';
+import { SafeHtml } from '../common/SafeHtml';
 
 export const EducationSection = ({ education = [] }) => {
   return (
@@ -45,9 +46,7 @@ export const EducationSection = ({ education = [] }) => {
               )}
 
               {edu.description && (
-                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                  {edu.description}
-                </p>
+                <SafeHtml html={edu.description} className="text-sm text-slate-300 leading-relaxed" />
               )}
             </div>
           ))}

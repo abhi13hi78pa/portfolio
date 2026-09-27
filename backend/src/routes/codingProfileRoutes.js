@@ -5,13 +5,13 @@ import {
   updateCodingProfile,
   deleteCodingProfile,
 } from '../controllers/codingProfileController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getCodingProfiles);
-router.post('/', protect, createCodingProfile);
-router.put('/:id', protect, updateCodingProfile);
-router.delete('/:id', protect, deleteCodingProfile);
+router.post('/', protect, requireRole('admin'), createCodingProfile);
+router.put('/:id', protect, requireRole('admin'), updateCodingProfile);
+router.delete('/:id', protect, requireRole('admin'), deleteCodingProfile);
 
 export default router;

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Calendar, MapPin } from 'lucide-react';
 import { EmptyState } from './EmptyState';
+import { SafeHtml } from '../common/SafeHtml';
+import { parseTechStack } from '../../utils/techStack';
 
 export const ExperienceSection = ({ experience = [] }) => {
   return (
@@ -18,11 +20,7 @@ export const ExperienceSection = ({ experience = [] }) => {
       ) : (
         <div className="space-y-4">
           {experience.map((exp) => {
-            const techs = Array.isArray(exp.technologies)
-              ? exp.technologies
-              : typeof exp.technologies === 'string'
-              ? JSON.parse(exp.technologies || '[]')
-              : [];
+            const techs = parseTechStack(exp.technologies);
 
             return (
               <div
@@ -54,9 +52,7 @@ export const ExperienceSection = ({ experience = [] }) => {
                 )}
 
                 {exp.description && (
-                  <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line mb-3">
-                    {exp.description}
-                  </p>
+                  <SafeHtml html={exp.description} className="text-sm text-slate-300 leading-relaxed mb-3" />
                 )}
 
                 {techs.length > 0 && (

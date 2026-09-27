@@ -32,6 +32,10 @@ export const Admin = sequelize.define('Admin', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  refreshTokenHash: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+  },
 }, {
   hooks: {
     beforeCreate: async (admin) => {

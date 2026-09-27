@@ -5,13 +5,13 @@ import {
   updateEducation,
   deleteEducation,
 } from '../controllers/educationController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getEducation);
-router.post('/', protect, createEducation);
-router.put('/:id', protect, updateEducation);
-router.delete('/:id', protect, deleteEducation);
+router.post('/', protect, requireRole('admin'), createEducation);
+router.put('/:id', protect, requireRole('admin'), updateEducation);
+router.delete('/:id', protect, requireRole('admin'), deleteEducation);
 
 export default router;

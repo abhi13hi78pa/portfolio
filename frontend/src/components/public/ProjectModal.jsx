@@ -1,14 +1,12 @@
 import React from 'react';
 import { X, ExternalLink, Github, BookOpen, Calendar, Tag } from 'lucide-react';
+import { parseTechStack } from '../../utils/techStack';
+import { SafeHtml } from '../common/SafeHtml';
 
 export const ProjectModal = ({ project, onClose }) => {
   if (!project) return null;
 
-  const techStack = Array.isArray(project.techStack)
-    ? project.techStack
-    : typeof project.techStack === 'string'
-    ? JSON.parse(project.techStack || '[]')
-    : [];
+  const techStack = parseTechStack(project.techStack);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
@@ -59,8 +57,8 @@ export const ProjectModal = ({ project, onClose }) => {
         <div className="space-y-3 mb-6 text-sm text-slate-300 leading-relaxed">
           <p>{project.description}</p>
           {project.detailedDescription && (
-            <div className="pt-2 border-t border-slate-800/80 whitespace-pre-line text-slate-300">
-              {project.detailedDescription}
+            <div className="pt-2 border-t border-slate-800/80">
+              <SafeHtml html={project.detailedDescription} className="text-sm text-slate-300" />
             </div>
           )}
         </div>

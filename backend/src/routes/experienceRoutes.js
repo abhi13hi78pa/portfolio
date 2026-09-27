@@ -5,13 +5,13 @@ import {
   updateExperience,
   deleteExperience,
 } from '../controllers/experienceController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getExperience);
-router.post('/', protect, createExperience);
-router.put('/:id', protect, updateExperience);
-router.delete('/:id', protect, deleteExperience);
+router.post('/', protect, requireRole('admin'), createExperience);
+router.put('/:id', protect, requireRole('admin'), updateExperience);
+router.delete('/:id', protect, requireRole('admin'), deleteExperience);
 
 export default router;

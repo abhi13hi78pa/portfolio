@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { sanitizeRichText, sanitizePlainText } from '../utils/sanitize.js';
 
 export const Project = sequelize.define('Project', {
   id: {
@@ -59,4 +60,23 @@ export const Project = sequelize.define('Project', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+}, {
+  hooks: {
+    beforeCreate: (project) => {
+      if (project.name) project.name = sanitizePlainText(project.name);
+      if (project.shortTitle) project.shortTitle = sanitizePlainText(project.shortTitle);
+      if (project.description) project.description = sanitizeRichText(project.description);
+      if (project.detailedDescription) project.detailedDescription = sanitizeRichText(project.detailedDescription);
+    },
+    beforeUpdate: (project) => {
+      if (project.name) project.name = sanitizePlainText(project.name);
+      if (project.shortTitle) project.shortTitle = sanitizePlainText(project.shortTitle);
+      if (project.description) project.description = sanitizeRichText(project.description);
+      if (project.detailedDescription) project.detailedDescription = sanitizeRichText(project.detailedDescription);
+    },
+  },
+  indexes: [
+    { fields: ['isPublished'] },
+    { fields: ['displayOrder'] },
+  ],
 });

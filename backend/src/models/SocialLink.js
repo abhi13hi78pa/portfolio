@@ -27,4 +27,9 @@ export const SocialLink = sequelize.define('SocialLink', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+}, {
+  indexes: [
+    { fields: ['displayOrder'] },
+    { fields: ['isActive'] },
+  ],
 });
